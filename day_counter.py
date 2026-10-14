@@ -62,8 +62,3 @@ def string_to_date(date_str, time):
         if date_str == '' and time == '':
             return [False, 'Впишите значения!']
         return [False, 'Неверные значения!']
-
-def main():
-    start = load_start()
-    print(f"📅 Старт: {start.strftime('%d.%m.%Y %H:%M:%S')}")
-    show(start)

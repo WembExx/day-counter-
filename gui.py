@@ -10,6 +10,7 @@ class App():
         self.root.geometry('500x300')
         self.root.resizable(width=False, height=False)
         self.root.title('Counter Days')
+        self.root.iconbitmap('icon.ico')
 
         # ====================================== #
 
@@ -49,11 +50,10 @@ class App():
         self.entry_date = ctk.CTkEntry(master=self.frame3, width=80, placeholder_text='01.01.2001')
         self.entry_date.grid(column=1, row=0)
 
-        self.vcmd = (self.root.register(self.validate_date), '%P')
-        self.entry_time = ctk.CTkEntry(master=self.frame3, validate='key', validatecommand=self.vcmd,width=50, placeholder_text='12:00')
+        self.entry_time = ctk.CTkEntry(master=self.frame3, width=50, placeholder_text='12:00')
         self.entry_time.grid(column=2, row=0, padx=10)
 
-        self.btn_confirm_date = ctk.CTkButton(master=self.frame3, fg_color='#6A5ACD', text='Старт', width=100, command=self.reset_start_date)
+        self.btn_confirm_date = ctk.CTkButton(master=self.frame3, fg_color='#6A5ACD', text='Старт', font=('Arial', 15, 'bold'), width=100, command=self.reset_start_date)
         self.btn_confirm_date.grid(column=3, row=0, padx=10)
 
         self.btn_reset_date = ctk.CTkButton(master=self.root, fg_color='#6A5ACD', font=('Arial', 15, 'bold'), text='Сбросить счетчик', command=self.confirm_reset, height=40, width=100)
@@ -67,6 +67,7 @@ class App():
         self.confirm_window = ctk.CTkToplevel()
         self.confirm_window.geometry('300x150')
         self.confirm_window.title('Подтвердите выбор')
+        self.confirm_window.iconbitmap('icon.ico')
         self.confirm_window.resizable(width=False, height=False)
         self.confirm_window.after(200, self._bring_to_front)
 
@@ -91,11 +92,6 @@ class App():
         self.confirm_window.focus_force()
         self.confirm_window.grab_set()
 
-    def validate_date(value, max_symbol=4):
-        if len(value) > max_symbol:
-            return True
-        return False
-
     def reset_start_date(self):
         date = str(self.entry_date.get())
         time = str(self.entry_time.get())
@@ -103,7 +99,6 @@ class App():
         if answer[0] == True:
             self.label_start_date.configure(text=f'Дата запуска: {day_counter.start_date()}')
         elif answer[0] == False:
-            print(answer[1])
             messagebox.showerror('Ошибка', answer[1])
 
     def display_time(self):
