@@ -4,6 +4,7 @@ from datetime import datetime ,date
 
 FILE = "tracker.json"
 
+
 def load_start():
     """Читает стартовую дату из файла. Если файла нет — создаёт."""
     if os.path.exists(FILE):
@@ -61,7 +62,7 @@ def string_to_date(date_str, time):
         if date_str == '' or time == '':
             print('Введите значения!')
         else: 
-            print('Неверное значение!')
+            print('VALUE ERROR')
             return False
 
 def main():
