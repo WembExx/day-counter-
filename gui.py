@@ -1,0 +1,122 @@
+import customtkinter as ctk
+import day_counter
+import threading
+from functools import partial
+
+class App():
+    def __init__(self):
+        self.root = ctk.CTk()
+        self.root.geometry('500x300')
+        self.root.resizable(width=False, height=False)
+        self.root.title('Counter Days')
+
+        # ====================================== #
+
+        self.title_frame = ctk.CTkFrame(master=self.root, width=400, height=50)
+        self.title_frame.pack(pady=10)
+        self.title_frame.pack_propagate(False)
+
+        self.label_title = ctk.CTkLabel(master=self.title_frame, text='Counter Days', font=('Arial', 40, 'bold'))
+        self.label_title.pack()
+
+        self.frame = ctk.CTkFrame(master=self.root, width=400, height=55)
+        self.frame.pack(pady=0)
+        self.frame.pack_propagate(False)
+
+        self.label_start_date = ctk.CTkLabel(master=self.frame, text=f'Дата запуска: {day_counter.start_date()}', font=('Arial', 15))
+        self.label_start_date.pack()
+
+        self.label_current_date = ctk.CTkLabel(master=self.frame, text=f'Текущая дата: {day_counter.current_date()}', font=('Arial', 15))
+        self.label_current_date.pack()
+
+        self.frame2 = ctk.CTkFrame(master=self.root, width=200, height=50)
+        self.frame2.pack(pady=(20, 0))
+        self.frame2.pack_propagate(False)
+
+        self.label_elapsed_time = ctk.CTkLabel(master=self.frame2, text=day_counter.show(), font=('Arial', 20, 'bold'))
+        self.label_elapsed_time.pack(pady=10)
+
+        self.t = threading.Thread(target=self.display_time)
+        self.t.start()
+
+        self.frame3 = ctk.CTkFrame(master=self.root)
+        self.frame3.pack(pady=(10, 20))
+
+        self.label_confirm_date = ctk.CTkLabel(master=self.frame3, text='Укажите дату: ', font=('Arial', 20, 'bold'))
+        self.label_confirm_date.grid(column=0, row=0)
+
+        self.entry_date = ctk.CTkEntry(master=self.frame3, width=80, placeholder_text='01.01.2001')
+        self.entry_date.grid(column=1, row=0)
+
+        self.vcmd = (self.root.register(self.validate_date), '%P')
+        self.entry_time = ctk.CTkEntry(master=self.frame3, validate='key', validatecommand=self.vcmd,width=50, placeholder_text='12:00')
+        self.entry_time.grid(column=2, row=0, padx=10)
+
+        self.btn_confirm_date = ctk.CTkButton(master=self.frame3, fg_color='#6A5ACD', text='Старт', width=100, command=self.reset_start_date)
+        self.btn_confirm_date.grid(column=3, row=0, padx=10)
+
+        self.btn_reset_date = ctk.CTkButton(master=self.root, fg_color='#6A5ACD', font=('Arial', 15, 'bold'), text='Сбросить счетчик', command=self.confirm_reset, height=40, width=100)
+        self.btn_reset_date.pack()
+
+        # ====================================== #
+
+        self.root.mainloop()
+
+    def confirm_reset(self):
+        self.confirm_window = ctk.CTkToplevel()
+        self.confirm_window.geometry('300x150')
+        self.confirm_window.title('Подтвердите выбор')
+        self.confirm_window.resizable(width=False, height=False)
+        self.confirm_window.after(200, self._bring_to_front)
+
+        self.confirm_window.after(200, lambda: self.confirm_window.grab_set())
+
+        self.frame_title = ctk.CTkFrame(master=self.confirm_window)
+        self.frame_title.pack(pady=20)
+        self.label = ctk.CTkLabel(master=self.frame_title, text='Сбросить счетчик?', font=('Arial', 20))
+        self.label.pack()
+
+        self.frame4 = ctk.CTkFrame(master=self.confirm_window)
+        self.frame4.pack(pady=10)
+
+        self.btn_confirm = ctk.CTkButton(master=self.frame4, text='Сброс', width=100, fg_color='#6A5ACD', command=partial(self.reset_date, True))
+        self.btn_confirm.grid(column=1, row=0, padx=(10, 0))
+
+        self.btn_refuce = ctk.CTkButton(master=self.frame4, text='Отмена', width=100, fg_color='#6A5ACD', command=partial(self.reset_date, False))
+        self.btn_refuce.grid(column=0, row=0, padx=(0, 10))
+
+    def _bring_to_front(self):
+        self.confirm_window.lift()
+        self.confirm_window.focus_force()
+        self.confirm_window.grab_set()
+
+    def validate_date(value, max_symbol=4):
+        if len(value) > max_symbol:
+            return True
+        return False
+
+    def reset_start_date(self):
+        date = str(self.entry_date.get())
+        time = str(self.entry_time.get())
+
+        if day_counter.string_to_date(date, time):
+            self.label_start_date.configure(text=f'Дата запуска: {day_counter.start_date()}')
+
+    def display_time(self):
+        while True:
+            self.label_elapsed_time.configure(text=day_counter.show())
+            self.label_current_date.configure(text=f'Текущая дата: {day_counter.current_date()}')
+
+    def reset_date(self, action):
+        if action == True:
+            day_counter.reset_date()
+            self.label_start_date.configure(text=f'Дата запуска: {day_counter.start_date()}')
+            self.confirm_window.destroy()
+        else: 
+            self.confirm_window.destroy()
+
+def main():
+    App()
+
+if __name__ == '__main__':
+    main()
