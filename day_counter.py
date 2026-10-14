@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime ,date
+from datetime import datetime
 
 FILE = "tracker.json"
 
@@ -53,17 +53,15 @@ def string_to_date(date_str, time):
         _date = datetime.strptime(f'{date_str} {time}', '%d.%m.%Y %H:%M')
 
         if _date > datetime.now():
-            print('Невозможная дата!')
+            return [False, 'Невозможная дата!']
         else: 
             with open(FILE, "w", encoding="utf-8") as f:
                 json.dump({"start": _date.isoformat()}, f, ensure_ascii=False)
-            return True
+            return [True]
     except ValueError as error:
-        if date_str == '' or time == '':
-            print('Введите значения!')
-        else: 
-            print('VALUE ERROR')
-            return False
+        if date_str == '' and time == '':
+            return [False, 'Впишите значения!']
+        return [False, 'Неверные значения!']
 
 def main():
     start = load_start()

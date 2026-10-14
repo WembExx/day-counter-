@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from tkinter import messagebox
 import day_counter
 import threading
 from functools import partial
@@ -98,9 +99,12 @@ class App():
     def reset_start_date(self):
         date = str(self.entry_date.get())
         time = str(self.entry_time.get())
-
-        if day_counter.string_to_date(date, time):
+        answer = day_counter.string_to_date(date, time)
+        if answer[0] == True:
             self.label_start_date.configure(text=f'Дата запуска: {day_counter.start_date()}')
+        elif answer[0] == False:
+            print(answer[1])
+            messagebox.showerror('Ошибка', answer[1])
 
     def display_time(self):
         while True:
