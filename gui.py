@@ -16,11 +16,10 @@ class App():
         self.root.protocol("WM_DELETE_WINDOW", self.root.withdraw)
 
         # ================== THREADS ================== #
+
         self.thread_tray = threading.Thread(target=self.start_tray)
         self.thread_tray.start()
         
-        self.thread_display_time = threading.Thread(target=self.display_time, daemon=True)
-        self.thread_display_time.start()
 
         # ============================================= #
 
@@ -49,6 +48,9 @@ class App():
 
         self.label_elapsed_time = ctk.CTkLabel(master=self.frame2, text=day_counter.show(), font=('Arial', 20, 'bold'))
         self.label_elapsed_time.pack(pady=10)
+
+        self.thread_display_time = threading.Thread(target=self.display_time, daemon=True)
+        self.thread_display_time.start()
 
         self.frame3 = ctk.CTkFrame(master=self.root)
         self.frame3.pack(pady=(10, 20))
