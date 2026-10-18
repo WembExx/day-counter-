@@ -3,6 +3,8 @@ from tkinter import messagebox
 import day_counter
 import threading
 from functools import partial
+import pystray
+from PIL import Image
 
 class App():
     def __init__(self):
@@ -11,8 +13,18 @@ class App():
         self.root.resizable(width=False, height=False)
         self.root.title('Counter Days')
         self.root.iconbitmap('icon.ico')
+        self.root.protocol("WM_DELETE_WINDOW", self.root.withdraw)
 
-        # ====================================== #
+        # ================== THREADS ================== #
+        self.thread_tray = threading.Thread(target=self.start_tray)
+        self.thread_tray.start()
+        
+        self.thread_display_time = threading.Thread(target=self.display_time, daemon=True)
+        self.thread_display_time.start()
+
+        # ============================================= #
+
+        # ================== GUI ================== #
 
         self.title_frame = ctk.CTkFrame(master=self.root, width=400, height=50)
         self.title_frame.pack(pady=10)
@@ -38,9 +50,6 @@ class App():
         self.label_elapsed_time = ctk.CTkLabel(master=self.frame2, text=day_counter.show(), font=('Arial', 20, 'bold'))
         self.label_elapsed_time.pack(pady=10)
 
-        self.t = threading.Thread(target=self.display_time)
-        self.t.start()
-
         self.frame3 = ctk.CTkFrame(master=self.root)
         self.frame3.pack(pady=(10, 20))
 
@@ -59,9 +68,9 @@ class App():
         self.btn_reset_date = ctk.CTkButton(master=self.root, fg_color='#6A5ACD', font=('Arial', 15, 'bold'), text='Сбросить счетчик', command=self.confirm_reset, height=40, width=100)
         self.btn_reset_date.pack()
 
-        # ====================================== #
-
         self.root.mainloop()
+
+        # ====================================== #
 
     def confirm_reset(self):
         self.confirm_window = ctk.CTkToplevel()
@@ -69,7 +78,7 @@ class App():
         self.confirm_window.title('Подтвердите выбор')
         self.confirm_window.iconbitmap('icon.ico')
         self.confirm_window.resizable(width=False, height=False)
-        self.confirm_window.after(200, self._bring_to_front)
+        self.confirm_window.after(200, self.bring_to_front)
 
         self.confirm_window.after(200, lambda: self.confirm_window.grab_set())
 
@@ -87,7 +96,7 @@ class App():
         self.btn_refuce = ctk.CTkButton(master=self.frame4, text='Отмена', width=100, fg_color='#6A5ACD', command=partial(self.reset_date, False))
         self.btn_refuce.grid(column=0, row=0, padx=(0, 10))
 
-    def _bring_to_front(self):
+    def bring_to_front(self):
         self.confirm_window.lift()
         self.confirm_window.focus_force()
         self.confirm_window.grab_set()
@@ -113,6 +122,30 @@ class App():
             self.confirm_window.destroy()
         else: 
             self.confirm_window.destroy()
+
+    # ================= TRAY ==================== #
+
+    def create_image(self):
+        self.image = Image.open('icon.ico')
+        return self.image
+
+    def on_quit(self, icon):
+        icon.stop()
+        self.root.after(0, self.root.destroy)
+
+    def on_click(self):
+        self.root.after(0, self.root.deiconify)
+
+    def start_tray(self):
+        self.menu = pystray.Menu(
+        pystray.MenuItem('Показать', self.on_click, default=True),
+        pystray.MenuItem('Выход', self.on_quit)
+        )
+
+        icon = pystray.Icon('test_icon', self.create_image(), 'Counter Days', self.menu)
+        icon.run()
+
+    # =========================================== #
 
 def main():
     App()
